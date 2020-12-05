@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Wallapoor</string>
+    <string name="type_an_email">Type an email</string>
+    <string name="type_a_password">Type a password</string>
+    <string name="register">Register</string>
+    <string name="login">Login</string>
+    <string name="recover">Recover</string>
+    <string name="permission_rationale">Location permission is needed for core functionality</string>
+    <string name="permission_denied_explanation">Permission was denied, but is needed for core functionality</string>
+    <string name="settings">Settings</string>
+</resources>
