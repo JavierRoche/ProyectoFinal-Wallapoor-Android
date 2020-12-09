@@ -1,8 +1,13 @@
 package com.tushe.wallapoor.network.managers
 
-import android.app.Activity
-import com.tushe.wallapoor.network.managers.userLocation.UserLocation
+import com.tushe.wallapoor.network.managers.userFirestore.UserAuthoritation
+import com.tushe.wallapoor.network.managers.userFirestore.UserFirestore
 
-class Managers(activity: Activity) {
-    //val managerUserLocation: UserLocation = UserLocation(activity)
+class Managers {
+    companion object {
+        // Manager de autentificacion de usuario
+        var managerUserAuthoritation: UserAuthoritation? = null
+        // Manager de tabla de Usuarios en Firestore
+        var managerUserFirestore: UserFirestore? = null
+    }
 }

@@ -8,4 +8,9 @@
     <string name="permission_rationale">Location permission is needed for core functionality</string>
     <string name="permission_denied_explanation">Permission was denied, but is needed for core functionality</string>
     <string name="settings">Settings</string>
+    <string name="type_an_username">Type an username</string>
+    <string name="error_empty">This field cannot be empty</string>
+    <string name="error_length">This field must be at least 5 characters</string>
+    <string name="password_recovered">Password recovered</string>
+    <string name="loading">Loading</string>
 </resources>

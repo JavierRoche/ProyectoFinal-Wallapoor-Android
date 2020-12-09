@@ -1,24 +1,40 @@
+@file:Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS", "NAME_SHADOWING")
+
 package com.tushe.wallapoor.ui.login
 
+import android.animation.Animator
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
+import android.view.View
+import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
+import com.google.android.material.snackbar.Snackbar
 import com.tushe.wallapoor.BuildConfig
 import com.tushe.wallapoor.R
+import com.tushe.wallapoor.common.Sender
 import com.tushe.wallapoor.common.isFirstTimeCreated
 import com.tushe.wallapoor.common.showSnackbar
+import com.tushe.wallapoor.network.managers.Managers
+import com.tushe.wallapoor.network.managers.userFirestore.UserAuthoritation
+import com.tushe.wallapoor.network.managers.userFirestore.UserFirestore
 import com.tushe.wallapoor.network.managers.userLocation.UserLocation
-import kotlinx.android.synthetic.main.activity_login.*
+import com.tushe.wallapoor.network.models.User
+import com.tushe.wallapoor.ui.main.MainActivity
+import kotlinx.android.synthetic.main.login_activity.*
+import java.util.*
 
-
-class LoginActivity: AppCompatActivity() {
-    // Instancia del viewModel
-    private var viewModel = LoginViewModel()
+class LoginActivity: AppCompatActivity(), LoginViewModel.LoginViewModelDelegate, Animator.AnimatorListener {
+    // Instancia del viewModel con el contexto de la actividad
+    private var viewModel = LoginViewModel(this@LoginActivity)
+    // Control para saber si esta la interface de registro abierta
+    private var onRegisterInterface: Boolean = false
 
     /**
      * LIFE CYCLE
@@ -28,23 +44,31 @@ class LoginActivity: AppCompatActivity() {
         // Al crearse la actividad llamamos al creador padre
         super.onCreate(savedInstanceState)
         // Indicamos cual es el fichero xml que maneja la actividad
-        setContentView(R.layout.activity_login)
+        this.setContentView(R.layout.login_activity)
+
+        /// Icializamos los managers necesarios
+        Managers.managerUserAuthoritation = UserAuthoritation()
+        Managers.managerUserFirestore = UserFirestore()
 
         // Comprobamos que sea la primera vez que se instancia la clase
         if (isFirstTimeCreated(savedInstanceState)) {
-            // Si el usuario ya esta logueado vamos directamente a showTopics()
-            /*if (UserRepo.isLogged(this.applicationContext)) {
-                // TODO: Ir a main
+            // Si el usuario esta logueado creamos escena principal
+            this.viewModel.checkUserLogged { user ->
+                if (user != null) {
+                    // Vista de loading antes de crear la escena principal
+                    this.enableLoading()
+                    this.viewModel.getUserLogged(user, { user ->
+                        // O usuario existente o usuario nuevo
+                        this.createMainScene(user)
 
-            } else {
-                // Indicamos con que fragmento inicia la actividad dentro del fragment_container definido en la vista xml
-                supportFragmentManager.beginTransaction()
-                    .add(R.id.fragmentContainer, signInFragment)
-                    .commit()
-            }*/
+                    }, {
+                        Snackbar.make(container, it.localizedMessage, Snackbar.LENGTH_LONG).show()
+                    })
+                }
+            }
 
-            // Definimos la UI con los elementos interactuables
-            configureUI()
+            // Preparacion de la interface de usuario
+            this.configureUI()
         }
     }
 
@@ -52,11 +76,7 @@ class LoginActivity: AppCompatActivity() {
         super.onStart()
 
         // Necesario aqui por si se viene por Settings
-        viewModel.askForLocationPermissions(this@LoginActivity) {
-            userInteractionOn()
-            println(it.toString())
-            // TODO something with location
-        }
+        this.viewModel.askForLocationPermissions(this@LoginActivity)
     }
 
 
@@ -64,43 +84,71 @@ class LoginActivity: AppCompatActivity() {
      * USER INTERACTIONS
      **/
 
-    private fun onAnimation() {
+    private fun openRegisterInterface() {
         val animationSet = AnimatorSet()
+        animationSet.addListener(this@LoginActivity)
 
-        // Creamos 2 animaciones
+        // Creamos las animaciones para los dos botones
         val registerTranslate = ObjectAnimator.ofFloat(registerButton, "translationY", 0.0f, 140.0f)
         registerTranslate.duration = 2000
         val loginTranslate = ObjectAnimator.ofFloat(loginButton, "translationY", 0.0f, 140.0f)
         loginTranslate.duration = 2000
-        // Las metemos en un set simultaneo
+        // Las ejecutamos simultaneamente
+        animationSet.playTogether(registerTranslate, loginTranslate)
+        animationSet.start()
+    }
+
+    private fun closeRegisterInterface() {
+        val animationSet = AnimatorSet()
+        animationSet.addListener(this@LoginActivity)
+
+        // Creamos las animaciones para los dos botones
+        val registerTranslate = ObjectAnimator.ofFloat(registerButton, "translationY", 0.0f, -140.0f)
+        registerTranslate.duration = 2000
+        val loginTranslate = ObjectAnimator.ofFloat(loginButton, "translationY", 0.0f, -140.0f)
+        loginTranslate.duration = 2000
+        // Las ejecutamos simultaneamente
         animationSet.playTogether(registerTranslate, loginTranslate)
         animationSet.start()
     }
 
 
     /**
-     * PRIVATE FUNCTIONS
+     * USER INTERACTIONS
      **/
 
     private fun configureUI() {
         // Desactivamos la interaccion del usuario en pantalla
-        userInteractionOff()
+        this.userInteractionOff()
 
-        // Incluimos el evento de click al boton ROTAR
+        // Abrimos el panel de registro o lanzamos el registro
         registerButton.setOnClickListener {
-            // TODO:
-            onAnimation()
-            //onAnimation(R.animator.register_translate)
+            if (!onRegisterInterface) {
+                openRegisterInterface()
+
+            } else {
+                register()
+            }
         }
-        // Incluimos el evento de click al boton ESCALAR
-        loginButton.setOnClickListener {
-            // TODO:
-        }
-        // Incluimos el evento de click al boton TRASLADAR
-        recoverButton.setOnClickListener {
-            // TODO:
-        }
+
+        // Lanzamos el login de usuario
+        loginButton.setOnClickListener { login() }
+        // Ocultamos el panel de registro
+        hideButton.setOnClickListener { closeRegisterInterface() }
+        // Lanzamos la recuperacion de contraseña de usuario
+        recoverButton.setOnClickListener { recover() }
+        // TODO: QUITAR
+        /*logoutButton.setOnClickListener {
+            Managers.managerUserAuthoritation?.logout {
+                Snackbar.make(container, "User logout", Snackbar.LENGTH_LONG).show()
+            }
+        }*/
     }
+
+
+    /**
+     * PRIVATE FUNCTIONS
+     **/
 
     private fun userInteractionOn() {
         inputEmail.isEnabled = true
@@ -118,6 +166,132 @@ class LoginActivity: AppCompatActivity() {
         recoverButton.isEnabled = false
     }
 
+    private fun isValidData(register: Boolean = false) : Boolean {
+        if (inputEmail.text.isEmpty()) {
+            inputEmail.error = getString(R.string.error_empty)
+            return false
+        }
+
+        if (inputPassword.text.isEmpty()) {
+            inputPassword.error = getString(R.string.error_empty)
+            return false
+        }
+
+        if (register && inputUsername.text.isEmpty()) {
+            inputUsername.error = getString(R.string.error_empty)
+            return false
+        }
+
+        if (register && inputUsername.text.toString().length < 5) {
+            inputUsername.error = getString(R.string.error_length)
+            return false
+        }
+        return true
+    }
+
+    private fun register() {
+        // Ocultamos el teclado
+        val inputMethodManager = this.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        inputMethodManager.hideSoftInputFromWindow(container.windowToken, 0)
+        this.enableLoading()
+
+        // Chequeamos la validez de los datos
+        if (!this.isValidData(true)) return
+
+        val email = inputEmail.text.toString().toLowerCase(Locale.ROOT)
+        val password = inputPassword.text.toString()
+        val username = inputUsername.text.toString()
+
+        // Inicializamos un User con los datos introducidos por el usuario y registramos
+        val user = User(Sender(String(), email), email, password)
+
+        this.viewModel.registerUser(user, { user ->
+            // El nuevo user aun no existira en Firestore pero se creara
+            user.username = username
+            this.viewModel.getUserLogged(user, { user ->
+                // Usuario nuevo y logueado
+                this.createMainScene(user)
+
+            }, {
+                Snackbar.make(container, it.localizedMessage, Snackbar.LENGTH_LONG).show()
+            })
+
+        }, {
+            Snackbar.make(container, it.localizedMessage, Snackbar.LENGTH_LONG).show()
+        })
+    }
+
+    private fun login() {
+        // Ocultamos el teclado
+        val inputMethodManager = this.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        inputMethodManager.hideSoftInputFromWindow(container.windowToken, 0)
+        this.enableLoading()
+
+        // Chequeamos la validez de los datos
+        if (!this.isValidData()) return
+
+        val email = inputEmail.text.toString().toLowerCase(Locale.ROOT)
+        val password = inputPassword.text.toString()
+
+        // Inicializamos un User con los datos introducidos por el usuario y logueamos
+        val user = User(Sender(String(), email), email, password)
+
+        this.viewModel.logUser(user, {
+            // Completamos el usuario Auth recuperado y lo buscamos en Firestore
+            this.viewModel.getUserLogged(user, { user ->
+                // Usuario existente y logueado
+                this.createMainScene(user)
+
+            }, {
+                Snackbar.make(container, it.localizedMessage, Snackbar.LENGTH_LONG).show()
+            })
+
+        }, {
+            Snackbar.make(container, it.localizedMessage, Snackbar.LENGTH_LONG).show()
+        })
+    }
+
+    private fun recover() {
+        // Chequeamos la validez de los datos
+        if (inputEmail.text.isEmpty()) {
+            inputEmail.error = getString(R.string.error_empty)
+            return
+        }
+
+        // Inicializamos un User con los datos introducidos por el usuario
+        val email = inputEmail.text.toString().toLowerCase(Locale.ROOT)
+        val user = User(Sender(String(), email), email, null)
+
+        this.viewModel.recoverUser(user, {
+            Snackbar.make(container, getString(R.string.password_recovered), Snackbar.LENGTH_LONG).show()
+
+        }, {
+            Snackbar.make(container, it.localizedMessage, Snackbar.LENGTH_LONG).show()
+        })
+    }
+
+    private fun enableLoading(enabled: Boolean = true) {
+        if (enabled) {
+            container.visibility = View.INVISIBLE
+            viewLoading.visibility = View.VISIBLE
+
+        } else {
+            container.visibility = View.VISIBLE
+            viewLoading.visibility = View.INVISIBLE
+        }
+    }
+
+    private fun createMainScene(user: User) {
+        // Liberamos memoria
+        Managers.managerUserAuthoritation = null
+        Managers.managerUserFirestore = null
+
+        // Creamos la escena principal
+        startActivity(MainActivity.getIntent(this, user))
+        finish()
+    }
+
+
     /**
      * DELEGATE METHODS
      */
@@ -128,11 +302,7 @@ class LoginActivity: AppCompatActivity() {
 
         when (PackageManager.PERMISSION_GRANTED) {
             grantResults[0] -> {
-                viewModel.askForLocationPermissions(this@LoginActivity) {
-                    userInteractionOn()
-                    println(it.toString())
-                    // TODO something with location
-                }
+                this.viewModel.askForLocationPermissions(this@LoginActivity)
             }
             else -> showSnackbar(this@LoginActivity, R.string.permission_denied_explanation, R.string.settings) {
                 // Intent que mostrara la pantalla de settings del dispositivo
@@ -145,4 +315,33 @@ class LoginActivity: AppCompatActivity() {
             }
         }
     }
+
+    override fun locationObtained() {
+        this.userInteractionOn()
+    }
+
+    override fun onAnimationStart(animation: Animator?) {
+        if (onRegisterInterface) {
+            // Ocultamos interface de registro
+            loginButton.isVisible = true
+            hideButton.isVisible = false
+            inputUsername.isVisible = false
+        }
+    }
+
+    override fun onAnimationEnd(animation: Animator?) {
+        if (onRegisterInterface) {
+            onRegisterInterface = false
+
+        } else {
+            onRegisterInterface = true
+            // Mostramos interface de registro
+            loginButton.isVisible = false
+            hideButton.isVisible = true
+            inputUsername.isVisible = true
+        }
+    }
+
+    override fun onAnimationCancel(animation: Animator?) {}
+    override fun onAnimationRepeat(animation: Animator?) {}
 }

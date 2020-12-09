@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "658653106791",
+    "firebase_url": "https://wallapoor.firebaseio.com",
+    "project_id": "wallapoor",
+    "storage_bucket": "wallapoor.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:658653106791:android:4eb5b4881a8c97ab96bac2",
+        "android_client_info": {
+          "package_name": "com.tushe.wallapoor"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "658653106791-femjkair6b37b1dl3oded46834kfe28e.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCtJymURP75PVtU3CGtk2NyYkbi2atxM94"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "658653106791-femjkair6b37b1dl3oded46834kfe28e.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "658653106791-fvl1mioenr2krnjtqf7aovc9d62vbn6p.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "Roche.Wallapobre"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

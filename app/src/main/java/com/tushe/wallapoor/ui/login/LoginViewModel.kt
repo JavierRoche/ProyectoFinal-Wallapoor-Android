@@ -1,18 +1,38 @@
+@file:Suppress("NAME_SHADOWING")
+
 package com.tushe.wallapoor.ui.login
 
+import android.content.Context
 import android.location.Location
+import com.tushe.wallapoor.network.models.User
 import com.tushe.wallapoor.common.ExceptionClosure
+import com.tushe.wallapoor.network.managers.Managers
 import com.tushe.wallapoor.network.managers.userLocation.UserLocation
 
-class LoginViewModel {
+class LoginViewModel(context: Context) {
+    // Instancia del protocolo para delegar a la actividad
+    private var loginViewModelDelegate: LoginViewModelDelegate? = null
+    private lateinit var location: Location
+
+    /**
+     * PROTOCOLS
+     */
+
+    interface LoginViewModelDelegate {
+        fun locationObtained()
+    }
 
 
     /**
      * STATIC INIT
      */
 
-    companion object {
-
+    init {
+        // Comprobamos que el contexto de la actividad implementa el protocolo
+        if (context is LoginViewModelDelegate)
+            loginViewModelDelegate = context
+        else
+            throw IllegalArgumentException("Context doesn't implement ${LoginViewModelDelegate::class.java.canonicalName}")
     }
 
 
@@ -20,11 +40,12 @@ class LoginViewModel {
      * PUBLIC FUNCTIONS
      */
 
-    fun askForLocationPermissions(activity: LoginActivity, onSuccess: (Location) -> Unit) {
+    fun askForLocationPermissions(activity: LoginActivity) {
         val managerUserLocation = UserLocation()
         if (managerUserLocation.checkPermissions(activity)) {
-            managerUserLocation.getLocation(activity) {
-                onSuccess(it)
+            managerUserLocation.getLocation(activity) { location ->
+                this.location = location
+                loginViewModelDelegate?.locationObtained()
             }
 
         } else {
@@ -32,33 +53,70 @@ class LoginViewModel {
         }
     }
 
-    /*fun checkUserLogged(onSuccess: (User?) -> Unit, onError: ExceptionClosure?) {
+    fun checkUserLogged(onSuccess: (User?) -> Unit) {
         // Chequea usuario logueado en UserAuthoritation
-        /*Managers.managerUserAuthoritation!.isLogged(onSuccess: { [weak self] user in
-            if user != nil && self!.oneTime {
-                // Devolvemos el user logueado
-                DispatchQueue.main.async {
-                    onSuccess(user)
-                }
+        Managers.managerUserAuthoritation?.isLogged { user ->
+            onSuccess(user)
+        }
+    }
 
-            } else if user == nil && self!.oneTime {
-                // Configuramos la escena inicial para usuario NO logueado
-                self?.userNotLoggedIn(fromLogout: false)
+    fun registerUser(user: User, onSuccess: (User) -> Unit, onError: ExceptionClosure?) {
+        // Registra nuevo usuario en UserAuthoritation
+        Managers.managerUserAuthoritation?.register(user, { user ->
+            onSuccess(user)
 
-                // Devolvemos nil
-                DispatchQueue.main.async {
+        }, { error ->
+            if (onError != null)
+                onError(error)
+        })
+    }
+
+    fun logUser(user: User, onSuccess: (User) -> Unit, onError: ExceptionClosure?) {
+        // Loguea usuario existente en UserAuthoritation
+        Managers.managerUserAuthoritation?.login(user, { user ->
+            onSuccess(user)
+
+        }, { error ->
+            if (onError != null)
+                onError(error)
+        })
+    }
+
+    fun getUserLogged(user: User, onSuccess: (User) -> Unit, onError: ExceptionClosure?) {
+        Managers.managerUserFirestore?.selectUser(user.sender.id, { firestoreUser ->
+            if (firestoreUser != null) {
+                // Devolvemos el usuario existente en Firestore BD
+                onSuccess(firestoreUser)
+
+            } else {
+                // El usuario no existe en Firestore BD. Completamos datos e insertamos
+                user.latitude = location.latitude
+                user.longitude = location.longitude
+                Managers.managerUserFirestore?.insertUser(user, {
+                    // Devolvemos el usuario nuevo
                     onSuccess(user)
-                }
+
+                }, { error ->
+                    if (onError != null)
+                        onError(error)
+                })
             }
 
-        }) { error in
-                if let retError = onError {
-                    DispatchQueue.main.async {
-                        retError(error)
-                    }
-                }
-        }*/
-    }*/
+        }, { error ->
+            if (onError != null)
+                onError(error)
+        })
+    }
+
+    fun recoverUser(user: User, onSuccess: () -> Unit, onError: ExceptionClosure?) {
+        Managers.managerUserAuthoritation?.recoverPassword(user, {
+            onSuccess()
+
+        }, { error ->
+            if (onError != null)
+                onError(error)
+        })
+    }
 
 
     /**

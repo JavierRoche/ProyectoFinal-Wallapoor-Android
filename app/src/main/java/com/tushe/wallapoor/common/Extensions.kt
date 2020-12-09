@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.google.android.material.snackbar.Snackbar
+import java.io.Serializable
 import java.lang.Exception
 
 // Las extensiones nos permiten añadir metodos a las clases sin tener que tocar el fuente de la clase
@@ -25,4 +26,6 @@ fun showSnackbar(activity: Activity, stringId: Int, actionId: Int, listener: Vie
         Snackbar.LENGTH_INDEFINITE).setAction(activity.getString(actionId), listener).show()
 }
 
-typealias ExceptionClosure = (Exception) -> Void
+typealias ExceptionClosure = (Exception) -> Unit
+
+data class Sender(var id: String, var displayName: String) : Serializable
