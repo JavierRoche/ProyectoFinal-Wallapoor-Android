@@ -11,7 +11,7 @@ import com.tushe.wallapoor.network.managers.userLocation.UserLocation
 
 class LoginViewModel(context: Context) {
     // Instancia del protocolo para delegar a la actividad
-    private var loginViewModelDelegate: LoginViewModelDelegate? = null
+    private var delegate: LoginViewModelDelegate? = null
     private lateinit var location: Location
 
     /**
@@ -30,7 +30,7 @@ class LoginViewModel(context: Context) {
     init {
         // Comprobamos que el contexto de la actividad implementa el protocolo
         if (context is LoginViewModelDelegate)
-            loginViewModelDelegate = context
+            delegate = context
         else
             throw IllegalArgumentException("Context doesn't implement ${LoginViewModelDelegate::class.java.canonicalName}")
     }
@@ -45,7 +45,7 @@ class LoginViewModel(context: Context) {
         if (managerUserLocation.checkPermissions(activity)) {
             managerUserLocation.getLocation(activity) { location ->
                 this.location = location
-                loginViewModelDelegate?.locationObtained()
+                delegate?.locationObtained()
             }
 
         } else {

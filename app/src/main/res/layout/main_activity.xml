@@ -1,16 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="@color/blue"
-    android:id="@+id/container">
+    android:id="@+id/fragmentContainer">
 
-    <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/logoutButton2"
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/navigation"
         android:layout_width="match_parent"
-        android:layout_height="30dp"
-        android:background="@color/white"
-        android:layout_marginTop="200dp"
-        android:text="LOGOUT"/>
-</FrameLayout>
+        android:layout_height="wrap_content"
+        style="@style/Widget.MaterialComponents.BottomNavigationView.Colored"
+        app:labelVisibilityMode="unlabeled"
+        app:elevation="16dp"
+        app:menu="@menu/bottom_navigation_menu"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+</androidx.constraintlayout.widget.ConstraintLayout>

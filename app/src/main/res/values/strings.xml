@@ -13,4 +13,7 @@
     <string name="error_length">This field must be at least 5 characters</string>
     <string name="password_recovered">Password recovered</string>
     <string name="loading">Loading</string>
+    <string name="shopping">Shopping</string>
+    <string name="profile">Profile</string>
+    <string name="categories">Categories</string>
 </resources>
