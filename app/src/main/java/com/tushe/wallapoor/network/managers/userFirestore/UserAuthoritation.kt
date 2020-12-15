@@ -8,7 +8,7 @@ import com.tushe.wallapoor.common.ExceptionClosure
 import com.tushe.wallapoor.common.Sender
 import com.tushe.wallapoor.network.models.User
 
-class UserAuthoritation : UserAuthorizationManager {
+class UserAuthoritation: UserAuthorizationManager {
     override fun register(user: User, onSuccess: (User) -> Unit, onError: ExceptionClosure?) {
         // Metodo que accede a Firebase a realizar un registro con email y password
         Firebase.auth.createUserWithEmailAndPassword(user.email, user.password!!).addOnCompleteListener {

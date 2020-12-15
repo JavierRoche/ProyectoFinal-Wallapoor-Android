@@ -19,6 +19,8 @@ android {
         multiDexEnabled true
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        // Necesaria para que se pinten los elementos importados vectoriales tales como botones
+        vectorDrawables.useSupportLibrary = true
     }
 
     buildTypes {
@@ -53,6 +55,12 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    // SwipeRefresh
+    implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0"
+    // Glide
+    implementation ("com.github.bumptech.glide:glide:4.11.0") {
+        exclude group: "com.android.support"
+    }
 
     // Google Maps
     implementation 'com.google.android.gms:play-services-location:17.0.0'

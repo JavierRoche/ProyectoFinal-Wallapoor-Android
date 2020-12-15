@@ -37,7 +37,7 @@ data class User (
     companion object {
         fun mapper(document: QueryDocumentSnapshot) : User {
             val json = document.data
-            /// Extraemos los valores; como puede venir vacio indicamos un valor por defecto
+            // Extraemos los valores; como puede venir vacio indicamos un valor por defecto
             val userId = json["userid"] as? String ?: String()
             val email = json["email"] as? String ?: String()
             val username = json["username"] as? String ?: String()
@@ -47,7 +47,7 @@ data class User (
             val shopping = json["shopping"] as? Long ?: 0
             val sales = json["sales"] as? Long ?: 0
 
-            /// Creamos y devolvemos el objeto User
+            // Creamos y devolvemos el objeto User
             return User(userId, email, username, latitude, longitude, avatar, shopping.toInt(), sales.toInt())
         }
 
@@ -61,8 +61,7 @@ data class User (
                 "longitude" to user.longitude,
                 "avatar" to user.avatar,
                 "shopping" to user.shopping,
-                "sales" to user.sales
-            )
+                "sales" to user.sales)
         }
     }
 }

@@ -8,11 +8,17 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.tushe.wallapoor.R
 import com.tushe.wallapoor.common.inflate
+import com.tushe.wallapoor.network.models.Product
 import com.tushe.wallapoor.network.models.User
+import kotlinx.android.synthetic.main.products_fragment.*
 
-class ProductsFragment : Fragment() {
+class ProductsFragment: Fragment(),
+        ProductsAdapter.TapDelegate,
+        ProductsViewModel.ProductsViewModelDelegate {
     // Delegado que maneja los eventos de usuario sobre el fragmento
     private var delegate: ProductsFragmentDelegate? = null
+    // Para usar el adaptador y sus layouts
+    private lateinit var adapter: ProductsAdapter
 
     /**
      * PROTOCOLS
@@ -20,6 +26,7 @@ class ProductsFragment : Fragment() {
 
     // Protocolo delegado
     interface ProductsFragmentDelegate {
+        fun onCreateProduct()
     }
 
 
@@ -33,7 +40,7 @@ class ProductsFragment : Fragment() {
 
         // Al hacer apply podemos incluirle argumentos en su interior
         fun newInstance(context: Context, user: User) = ProductsFragment().apply {
-            viewModel = ProductsViewModel(context)
+            viewModel = ProductsViewModel(this)
             ProductsViewModel.user = user
         }
     }
@@ -56,17 +63,43 @@ class ProductsFragment : Fragment() {
 
     // Una vez creada la instancia del fragmento
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return container?.inflate(R.layout.main_fragment)
+        return container?.inflate(R.layout.products_fragment)
     }
 
     // Marca la disponibilidad de la vista tras su creacion
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        /*labelCreateAccount.setOnClickListener {
-            signInInteractionListener?.onGoToSignUp()
-        }*/
+        // Lanzamos la creacion de un nuevo producto
+        newProductButton.setOnClickListener { delegate?.onCreateProduct() }
+    }
 
+    override fun onResume() {
+        super.onResume()
+
+        // Recuperamos los productos de Firestore
         viewModel.viewWasCreated()
+    }
+
+
+    /**
+     * DELEGATE METHODS
+     **/
+
+    override fun productsModelCreated() {
+        activity?.applicationContext?.let { context ->
+            // Construimos el adaptador con el contexto, el listener de eventos y la lista de productos
+            adapter = ProductsAdapter(context, this, viewModel.getProductList())
+            // Asignamos al grid el adaptador creado y el layout
+            productsGridView.adapter = adapter
+        }
+    }
+
+    override fun filterApplied() {
+        println("filterApplied")
+    }
+
+    override fun onItemTap(product: Product?) {
+        println("onItemTap")
     }
 }

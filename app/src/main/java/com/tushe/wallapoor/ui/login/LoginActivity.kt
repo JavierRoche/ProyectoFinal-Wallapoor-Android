@@ -15,8 +15,8 @@ import android.view.View
 import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
+import androidx.multidex.BuildConfig
 import com.google.android.material.snackbar.Snackbar
-import com.tushe.wallapoor.BuildConfig
 import com.tushe.wallapoor.R
 import com.tushe.wallapoor.common.Sender
 import com.tushe.wallapoor.common.isFirstTimeCreated
@@ -137,12 +137,6 @@ class LoginActivity: AppCompatActivity(), LoginViewModel.LoginViewModelDelegate,
         hideButton.setOnClickListener { closeRegisterInterface() }
         // Lanzamos la recuperacion de contraseña de usuario
         recoverButton.setOnClickListener { recover() }
-        // TODO: QUITAR
-        /*logoutButton.setOnClickListener {
-            Managers.managerUserAuthoritation?.logout {
-                Snackbar.make(container, "User logout", Snackbar.LENGTH_LONG).show()
-            }
-        }*/
     }
 
 
@@ -294,7 +288,7 @@ class LoginActivity: AppCompatActivity(), LoginViewModel.LoginViewModelDelegate,
 
     /**
      * DELEGATE METHODS
-     */
+     **/
 
     // Metodo delegado que salta cuando el usuario responde al requerimiento de permisos
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {

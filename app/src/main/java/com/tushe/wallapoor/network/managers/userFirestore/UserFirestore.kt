@@ -5,7 +5,7 @@ import com.google.firebase.firestore.QueryDocumentSnapshot
 import com.tushe.wallapoor.common.ExceptionClosure
 import com.tushe.wallapoor.network.models.User
 
-class UserFirestore : UserFirestoreManager {
+class UserFirestore: UserFirestoreManager {
     // Instancia para acceder al nodo principal de la DB de Firestore
     private var db = FirebaseFirestore.getInstance().collection("users")
 

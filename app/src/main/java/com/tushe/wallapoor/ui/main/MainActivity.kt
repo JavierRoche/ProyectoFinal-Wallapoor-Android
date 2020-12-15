@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.tushe.wallapoor.R
 import com.tushe.wallapoor.common.isFirstTimeCreated
+import com.tushe.wallapoor.network.models.Product
 import com.tushe.wallapoor.network.models.User
 import com.tushe.wallapoor.ui.main.MainActivity.Companion.productsFragment
 import com.tushe.wallapoor.ui.main.products.ProductsFragment
@@ -16,9 +17,8 @@ import com.tushe.wallapoor.ui.main.profile.ProfileFragment
 import com.tushe.wallapoor.ui.main.profile.ProfileViewModel
 import kotlinx.android.synthetic.main.main_activity.*
 
-class MainActivity : AppCompatActivity(),
+class MainActivity: AppCompatActivity(),
         ProductsFragment.ProductsFragmentDelegate,
-        ProductsViewModel.ProductsViewModelDelegate,
         ProfileFragment.ProfileFragmentDelegate,
         ProfileViewModel.ProfileViewModelDelegate {
 
@@ -74,6 +74,9 @@ class MainActivity : AppCompatActivity(),
         // Definimos el listener que se activa al cambiar la navegacion
         navigation.setOnNavigationItemSelectedListener(onNavigationSelection)
 
+        // Configuracion UI
+        this.prepareButtons()
+
         // Comprobamos que sea la primera vez que se instancia la clase
         if (isFirstTimeCreated(savedInstanceState)) {
             // Intentamos recuperar el usuario logueado
@@ -95,9 +98,21 @@ class MainActivity : AppCompatActivity(),
     }
 
 
+
+
     /**
      * PRIVATE FUNCTIONS
      **/
 
+    private fun prepareButtons() {
+        //categoriesMenu
+    }
 
+    /**
+     * DELEGATE METHODS
+     **/
+
+    override fun onCreateProduct() {
+        TODO("Not yet implemented")
+    }
 }
