@@ -32,6 +32,12 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".ui.filters.FiltersActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.Wallapoor.NoActionbar">
+        </activity>
     </application>
 
 </manifest>

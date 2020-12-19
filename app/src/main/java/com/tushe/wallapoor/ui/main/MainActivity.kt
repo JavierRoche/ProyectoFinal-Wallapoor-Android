@@ -4,12 +4,15 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
+import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.get
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.tushe.wallapoor.R
 import com.tushe.wallapoor.common.isFirstTimeCreated
 import com.tushe.wallapoor.network.models.Product
 import com.tushe.wallapoor.network.models.User
+import com.tushe.wallapoor.ui.filters.FiltersActivity
 import com.tushe.wallapoor.ui.main.MainActivity.Companion.productsFragment
 import com.tushe.wallapoor.ui.main.products.ProductsFragment
 import com.tushe.wallapoor.ui.main.products.ProductsViewModel
@@ -92,6 +95,12 @@ class MainActivity: AppCompatActivity(),
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         // Con ayuda del Inflater de menus que me llega inflamos el menu
         menuInflater.inflate(R.menu.search_bar_menu, menu)
+        val item = menu?.findItem(R.id.categoriesMenu)
+        item?.setOnMenuItemClickListener {
+            // Creamos la escena de seleccion de filtro
+            startActivity(FiltersActivity.getIntent(this))
+            return@setOnMenuItemClickListener true
+        }
 
         // Invocamos el comportamiento por defecto siempre despues de inflar el menu
         return super.onCreateOptionsMenu(menu)

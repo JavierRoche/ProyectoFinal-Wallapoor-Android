@@ -16,4 +16,13 @@
     <string name="shopping">Shopping</string>
     <string name="profile">Profile</string>
     <string name="categories">Categories</string>
+    <string name="services">Services</string>
+    <string name="sport_and_leisure">Sport and leisure</string>
+    <string name="computer_and_electronic">Computer and electronic</string>
+    <string name="home">Home</string>
+    <string name="textile">Textile</string>
+    <string name="engine_and_accessories">Engine and accessories</string>
+    <string name="filters_by_category">Filters by category</string>
+    <string name="filter_by_distance">Filter by distance</string>
+    <string name="_50">50</string>
 </resources>
